@@ -1,0 +1,28 @@
+version: '3'
+services:
+  server:
+    container_name: server
+    build:
+      context: .
+    env_file:
+      -  .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    command: yarn run start:dev
+    depends_on:
+      - db
+    restart: always
+  db:
+    container_name: postgres
+    image: postgres
+    restart: always
+    ports:
+      ["5432:5432"]
+    logging:
+      driver: none
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: warehouses
