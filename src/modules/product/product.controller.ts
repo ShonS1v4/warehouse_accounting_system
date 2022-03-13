@@ -1,12 +1,48 @@
-import { Controller, Post } from '@nestjs/common';
+import {Controller, Delete, Get, Patch, Post} from '@nestjs/common';
 import { ProductService } from './product.service';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productsService: ProductService) {}
 
-  @Post()
-  async x() {
-    await this.productsService.x();
+  @Get()
+  getAll() {
+
   }
+
+  @Get('/:id')
+  getById() {
+
+  }
+
+  @Post()
+  create() {
+
+  }
+
+  @Post()
+  createWithWarehouse() {
+
+  }
+
+  @Patch('/:id')
+  move() {
+
+  }
+
+  @Patch('remove/:productId/:warehouseId')
+  removeFromWarehouse() {
+
+  }
+
+  @Patch('remove/:id')
+  removeFromAllWarehouse() {
+
+  }
+
+  @Delete('/:id')
+  remove() {
+
+  }
+
 }
