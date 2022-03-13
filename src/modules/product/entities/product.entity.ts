@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
 import { Warehouse } from '../../warehouse/entities/warehouse.entity';
 
 @Entity()
@@ -12,6 +12,9 @@ export class Product {
   @Column({ nullable: false })
   stock: number;
 
-  @ManyToMany(() => Warehouse, (warehouse) => warehouse.products)
-  warehouses: Warehouse[];
+  @Column({nullable: false, default: true})
+  stashed: boolean;
+
+  @ManyToOne(() => Warehouse, warehouse => warehouse.products)
+  warehouses: Warehouse;
 }

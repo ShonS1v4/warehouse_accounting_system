@@ -1,4 +1,4 @@
-import {forwardRef, Inject, Injectable} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
@@ -12,22 +12,32 @@ export class ProductService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async create() {
-    return false
+  async create(data: ProductService) {
+    return false;
   }
 
-  async createToWarehouse() {
-    return false
-  }
-
-  async moveTo() {
+  async moveTo(productId: number, warehouseId: number) {
 
   }
 
-  async
-
-  async save() {
-    return false
+  //ГОТОВО
+  async getById(id: number) {
+    return this.productRepo.findOne({where: {id: id}, relations: ['warehouses']})
   }
 
+  //ГОТВО
+  async getAll() {
+    return this.productRepo.find({relations: ['warehouses']})
+  }
+
+  //ГОТВО
+  async remove(id: number) {
+    const candidate = await this.getById(id);
+    return this.productRepo.remove(candidate)
+  }
+
+  //ГОТОВО
+  async save(product: Product) {
+    return this.productRepo.save(product);
+  }
 }

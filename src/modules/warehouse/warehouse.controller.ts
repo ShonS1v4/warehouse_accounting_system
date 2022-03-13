@@ -1,4 +1,4 @@
-import {Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 
 @Controller('warehouse')
@@ -6,37 +6,23 @@ export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @Get()
-  getAll() {
-
-  }
+  getAll() {}
 
   @Get('/:id')
-  getById(@Param('id') id: number) {
-
-  }
+  getById(@Param('id') id: number) {}
 
   @Post()
-  createEmpty() {
-
-  }
+  createEmpty() {}
 
   @Post('/:productId')
-  createWithProduct() {
-
-  }
+  createWithProduct() {}
 
   @Patch()
-  update() {
-
-  }
+  update() {}
 
   @Patch('/removeProducts')
-  removeProducts() {
-
-  }
+  removeProducts() {}
 
   @Delete()
-  delete() {
-
-  }
+  delete() {}
 }
