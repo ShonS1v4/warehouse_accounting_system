@@ -5,6 +5,7 @@ import { Product } from './modules/product/entities/product.entity';
 import { Warehouse } from './modules/warehouse/entities/warehouse.entity';
 import { WarehouseModule } from './modules/warehouse/warehouse.module';
 import { ProductModule } from './modules/product/product.module';
+import { Stash } from './modules/product/entities/stash.entity';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { ProductModule } from './modules/product/product.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       synchronize: true,
-      entities: [Product, Warehouse],
+      entities: [Product, Warehouse, Stash],
     }),
     WarehouseModule,
     ProductModule,

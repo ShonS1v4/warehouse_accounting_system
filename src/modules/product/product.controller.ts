@@ -7,9 +7,10 @@ import {
   Param,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
+import { ProductDto } from './dto/product.dto';
+import { MoveDto } from './dto/move.dto';
 
 @Controller('product')
 export class ProductController {
@@ -34,7 +35,7 @@ export class ProductController {
   }
 
   @Post()
-  create(@Body() data: ProductService) {
+  create(@Body() data: ProductDto) {
     try {
       return this.productsService.create(data);
     } catch (e) {
@@ -43,12 +44,9 @@ export class ProductController {
   }
 
   @Patch('/move')
-  move(
-    @Query('productId') productId: number,
-    @Query('warehouseId') warehouseId: number,
-  ) {
+  move(@Body() data: MoveDto) {
     try {
-      return this.productsService.moveTo(productId, warehouseId);
+      return this.productsService.moveTo(data);
     } catch (e) {
       throw new HttpException(e.message, 500);
     }
