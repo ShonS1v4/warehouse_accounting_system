@@ -1,28 +1,33 @@
-import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
+import {WarehouseDto} from "./dto/warehouse.dto";
 
 @Controller('warehouse')
 export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @Get()
-  getAll() {}
+  getAll() {
+    return this.warehouseService.getAll()
+  }
 
   @Get('/:id')
-  getById(@Param('id') id: number) {}
+  getById(@Param('id') id: number) {
+    return this.warehouseService.getById(id)
+  }
 
   @Post()
-  createEmpty() {}
-
-  @Post('/:productId')
-  createWithProduct() {}
+  createEmpty(@Body() data: WarehouseDto) {
+    return this.warehouseService.create(data)
+  }
 
   @Patch()
-  update() {}
+  update(@Body() data: WarehouseDto) {
+    return this.warehouseService.update(data)
+  }
 
-  @Patch('/removeProducts')
-  removeProducts() {}
-
-  @Delete()
-  delete() {}
+  @Delete('/:id')
+  delete(@Param('id') id: number) {
+    return this.warehouseService.remove(id)
+  }
 }

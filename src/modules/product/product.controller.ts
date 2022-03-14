@@ -43,6 +43,15 @@ export class ProductController {
     }
   }
 
+  @Patch()
+  unStash(@Body() data: ProductDto) {
+    try {
+      return this.productsService.unStash(data)
+    } catch (e) {
+      throw new HttpException(e.message, 500)
+    }
+  }
+
   @Patch('/move')
   move(@Body() data: MoveDto) {
     try {

@@ -43,7 +43,13 @@ export class WarehouseService {
 
   //ГОТОВО
   async update(warehouse: WarehouseDto) {
-    console.log(warehouse)
+    const candidate = await this.wareHouseRepo.findOne({where: {name: warehouse.name}})
+    if (!candidate) return new HttpException(`Warehouse ${warehouse.name} doesn't exist!`, 404)
+    if (warehouse.name)
+      candidate.name = warehouse.name
+    if (warehouse.products)
+      await this.setProduct(warehouse.products, candidate.id)
+    return new HttpException(`Updated!`, 201)
   }
 
   //ГОТОВО
