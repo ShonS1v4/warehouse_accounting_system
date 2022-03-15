@@ -4,7 +4,8 @@ import { Warehouse } from './entities/warehouse.entity';
 import { Repository } from 'typeorm';
 import { ProductService } from '../product/product.service';
 import { WarehouseDto } from './dto/warehouse.dto';
-import {WarehouseProductsDto} from "./dto/warehouseProducts.dto";
+import { WarehouseProductsDto } from './dto/warehouseProducts.dto';
+import { ProductWarehouseDto } from '../product/dto/productWarehouse.dto';
 
 @Injectable()
 export class WarehouseService {
@@ -16,40 +17,52 @@ export class WarehouseService {
 
   //ГОТОВО
   async create(warehouse: WarehouseDto) {
-    const candidate = await this.wareHouseRepo.findOne({where: {name: warehouse.name}})
-    if (candidate)
-      return new HttpException(`Warehouse already exist!`, 409)
+    const candidate = await this.wareHouseRepo.findOne({
+      where: { name: warehouse.name },
+    });
+    if (candidate) return new HttpException(`Warehouse already exist!`, 409);
 
     const newWarehouse = this.wareHouseRepo.create({
-      name: warehouse.name
-    })
+      name: warehouse.name,
+    });
 
-    await this.wareHouseRepo.save(newWarehouse)
+    await this.wareHouseRepo.save(newWarehouse);
 
     if (warehouse.products)
-      await this.setProduct(warehouse.products, newWarehouse.id)
+      await this.setProduct(warehouse.products, newWarehouse.id);
 
-
-    return new HttpException(`Created`, 201)
+    return new HttpException(`Created`, 201);
   }
 
   //TODO rework it
   async setProduct(product: WarehouseProductsDto[], id: number) {
-    const warehouse = await this.getById(id)
-    product.map(async item => {
-      const product = await this.productService.create(item)
-    })
+    const products: ProductWarehouseDto[] = [];
+    product.map(async (item) => {
+      const productAdd: ProductWarehouseDto = {
+        warehouseId: id,
+        stock: item.stock,
+      };
+      products.push(productAdd);
+    });
+    for (let i = 0; i < products.length; i++) {
+      await this.productService.unStash(products[i], product[i].name);
+    }
   }
 
   //ГОТОВО
   async update(warehouse: WarehouseDto) {
-    const candidate = await this.wareHouseRepo.findOne({where: {name: warehouse.name}})
-    if (!candidate) return new HttpException(`Warehouse ${warehouse.name} doesn't exist!`, 404)
-    if (warehouse.name)
-      candidate.name = warehouse.name
+    const candidate = await this.wareHouseRepo.findOne({
+      where: { name: warehouse.name },
+    });
+    if (!candidate)
+      return new HttpException(
+        `Warehouse ${warehouse.name} doesn't exist!`,
+        404,
+      );
+    if (warehouse.name) candidate.name = warehouse.name;
     if (warehouse.products)
-      await this.setProduct(warehouse.products, candidate.id)
-    return new HttpException(`Updated!`, 201)
+      await this.setProduct(warehouse.products, candidate.id);
+    return new HttpException(`Updated!`, 201);
   }
 
   //ГОТОВО

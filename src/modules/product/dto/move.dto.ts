@@ -1,5 +1,5 @@
 export class MoveDto {
-  id: number;
+  warehouseId: number;
   to: number;
   stock: number;
 }

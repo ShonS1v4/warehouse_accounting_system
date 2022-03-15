@@ -1,11 +1,12 @@
-import {forwardRef, HttpException, Inject, Injectable} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Product} from './entities/product.entity';
-import {Repository} from 'typeorm';
-import {WarehouseService} from '../warehouse/warehouse.service';
-import {ProductDto} from './dto/product.dto';
-import {Stash} from './entities/stash.entity';
-import {MoveDto} from './dto/move.dto';
+import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from './entities/product.entity';
+import { Repository } from 'typeorm';
+import { WarehouseService } from '../warehouse/warehouse.service';
+import { ProductDto } from './dto/product.dto';
+import { Stash } from './entities/stash.entity';
+import { MoveDto } from './dto/move.dto';
+import { ProductWarehouseDto } from './dto/productWarehouse.dto';
 
 @Injectable()
 export class ProductService {
@@ -17,61 +18,36 @@ export class ProductService {
   ) {}
 
   async create(data: ProductDto) {
-    const candidate = await this.productCandidate(data.name)
-    if (candidate)
-      return new HttpException(`Product already exist! Please, use PATCH http://localhost:300/product?id=${candidate.id}`, 409);
-
-    const product = this.stashRepo.create({
-      name: data.name,
-      stock: data.stock
+    const candidate = await this.stashRepo.findOne({
+      where: {
+        name: data.name,
+      },
     });
-    if (data.warehouse) {
-      let total = 0;
-      data.warehouse.map(item => total += item.stock)
-      if (total>data.stock)
-        return new HttpException(`You can't add more items then in stock!`, 409)
-      product.stock -= total;
-      await this.stashRepo.save(product);
-      await this.unStash(data)
-    }
-    await this.stashRepo.save(product);
-    throw new HttpException(`Created`, 201)
-  }
-
-  async moveTo(data: MoveDto) {
-    const warehouse = await this.warehouseService.getById(data.to)
-    const product = await this.getById(data.id)
-    if (data.stock > product.stock)
-      return new HttpException(`You can't add more items then in stock!`, 409)
-    if (data.stock === product.stock)
-      await this.productRepo.remove(product)
-    product.stock -= data.stock
-    const newProduct = this.productRepo.create({
-      name: product.name,
+    if (candidate) return new HttpException(`${data.name} already exist!`, 409);
+    const product = await this.stashRepo.create({
+      name: data.name,
       stock: data.stock,
-    })
-    await this.save(newProduct)
-    warehouse.products = [newProduct]
-    await this.warehouseService.save(warehouse)
-    if (data.stock != product.stock)
-      await this.save(product)
-    return new HttpException(`Moved`, 201)
+    });
+    await this.stashRepo.save(product);
+    if (data.warehouse)
+      data.warehouse.map(
+        async (item) => await this.unStash(item, product.name),
+      );
+    return new HttpException(`Created`, 201);
   }
 
-  async unStash(product: ProductDto) {
-    product.warehouse.map(async item => {
-      const warehouse = await this.warehouseService.getById(item.warehouseId);
-      const newProduct = this.productRepo.create(
-          {
-            name: product.name,
-            stock: item.stock
-          }
-      );
-      await this.save(newProduct);
-      warehouse.products = [newProduct]
-      await this.warehouseService.save(warehouse)
-    })
-    return true;
+  async unStash(product: ProductWarehouseDto, name: string) {
+    const candidate = await this.warehouseService.getById(product.warehouseId);
+    if (candidate) {
+      const newProduct = this.productRepo.create({
+        name: name,
+        stock: product.stock,
+      });
+      await this.productRepo.save(newProduct);
+      candidate.products.push(newProduct);
+      await this.warehouseService.save(candidate);
+    }
+    return new HttpException(`Product ${name} not found`, 404);
   }
 
   //ГОТОВО
@@ -99,6 +75,24 @@ export class ProductService {
   }
 
   async productCandidate(name: string) {
-    return await this.stashRepo.findOne({where: {name: name}});
+    return await this.stashRepo.findOne({ where: { name: name } });
+  }
+
+  async moveTo(data: MoveDto, id: number) {
+    const warehouse = await this.warehouseService.getById(data.warehouseId);
+    const product = await this.productRepo.findOne({ where: { id: id } });
+    if (data.stock > product.stock)
+      return new HttpException(`You cant move more product when you have`, 409);
+    if (data.stock == product.stock) await this.productRepo.remove(product);
+    const newProduct = await this.productRepo.create({
+      name: product.name,
+      stock: data.stock,
+    });
+    product.stock -= data.stock;
+
+    await this.save(newProduct);
+    await this.save(product);
+    warehouse.products.push(newProduct);
+    await this.warehouseService.save(warehouse);
   }
 }

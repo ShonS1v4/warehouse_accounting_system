@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -18,5 +19,6 @@ export class Product {
   stock: number;
 
   @ManyToOne(() => Warehouse, (warehouse) => warehouse.products)
+  @JoinTable()
   warehouses: Warehouse;
 }

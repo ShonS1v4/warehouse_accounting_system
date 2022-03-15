@@ -9,6 +9,8 @@ export class Warehouse {
   @Column()
   name: string;
 
-  @OneToMany(() => Product, (product) => product.warehouses)
+  @OneToMany(() => Product, (product) => product.warehouses, {
+    cascade: true,
+  })
   products: Product[];
 }
