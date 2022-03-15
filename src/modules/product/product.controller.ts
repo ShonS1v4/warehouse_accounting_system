@@ -8,7 +8,10 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+
 import { ProductService } from './product.service';
+import {Product} from "./entities/product.entity";
+
 import { ProductDto } from './dto/product.dto';
 import { MoveDto } from './dto/move.dto';
 import { ProductWarehouseDto } from './dto/productWarehouse.dto';
@@ -18,7 +21,7 @@ export class ProductController {
   constructor(private readonly productsService: ProductService) {}
 
   @Get()
-  getAll() {
+  getAll(): Promise<Product[] | HttpException> {
     try {
       return this.productsService.getAll();
     } catch (e) {
@@ -27,7 +30,7 @@ export class ProductController {
   }
 
   @Get('/:id')
-  getById(@Param('id') id: number) {
+  getById(@Param('id') id: number): Promise<Product | HttpException> {
     try {
       return this.productsService.getById(id);
     } catch (e) {
@@ -36,7 +39,7 @@ export class ProductController {
   }
 
   @Post()
-  create(@Body() data: ProductDto) {
+  create(@Body() data: ProductDto): Promise<HttpException> {
     try {
       return this.productsService.create(data);
     } catch (e) {
@@ -47,8 +50,7 @@ export class ProductController {
   @Patch('/:name')
   setToWarehouse(
     @Param('name') name: string,
-    @Body() data: ProductWarehouseDto,
-  ) {
+    @Body() data: ProductWarehouseDto ): Promise<HttpException> {
     try {
       return this.productsService.unStash(data, name);
     } catch (e) {
@@ -57,7 +59,8 @@ export class ProductController {
   }
 
   @Patch('/move/:id')
-  move(@Param('id') id: number, @Body() data: MoveDto) {
+  move(@Param('id') id: number,
+       @Body() data: MoveDto): Promise<HttpException> {
     try {
       return this.productsService.moveTo(data, id);
     } catch (e) {
@@ -66,7 +69,7 @@ export class ProductController {
   }
 
   @Delete('/:id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id') id: number): Promise<Product> {
     try {
       return this.productsService.remove(id);
     } catch (e) {
