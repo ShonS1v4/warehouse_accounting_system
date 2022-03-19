@@ -62,34 +62,52 @@ export class ProductService {
     return new HttpException(`Product ${name} not found`, 404);
   }
 
-  async getById(id: number): Promise<Product> {
-    return this.productRepo.findOne({
+  async getById(id: number): Promise<Product | HttpException> {
+    const candidate = await this.productRepo.findOne({
       where: { id: id },
       relations: ['warehouses'],
     });
+    if (!candidate)
+      return new HttpException(`Product with ${id} not found!`, 404)
+    return candidate
   }
 
-  async getAll(): Promise<Product[]> {
-    return this.productRepo.find({ relations: ['warehouses'] });
+  async getAll(): Promise<Product[] | HttpException> {
+    const products = await this.productRepo.find({ relations: ['warehouses'] });
+    if (products.length === 0)
+      return new HttpException('Products not found!', 404)
+    return products
   }
 
-  async remove(id: number): Promise<Product> {
+  async remove(id: number): Promise<Product | HttpException> {
     const candidate = await this.getById(id);
-    return this.productRepo.remove(candidate);
+    return this.productRepo.remove(<Product>candidate);
   }
 
   async save(product: Product): Promise<Product> {
-    return this.productRepo.save(product);
+    try {
+      return this.productRepo.save(product);
+    } catch (e) {
+      throw new HttpException('Something goes wrong, please, try again', 400)
+    }
   }
 
   async moveTo(data: MoveDto, id: number): Promise<HttpException> {
     const warehouse = await this.warehouseService.getById(data.warehouseId);
+
+    if (!warehouse)
+      return new HttpException('Warehouse to move not found!', 404)
+
     const product = await this.productRepo.findOne({ where: { id: id } });
+
+    if (!product)
+      return new HttpException('Product to move not found!', 404)
 
     if (data.stock > product.stock)
       return new HttpException(`You cant move more product when you have`, 409);
 
     if (data.stock == product.stock) await this.productRepo.remove(product);
+
     const newProduct = await this.productRepo.create({
       name: product.name,
       stock: data.stock,

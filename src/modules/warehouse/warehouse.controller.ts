@@ -13,11 +13,16 @@ import { WarehouseService } from './warehouse.service';
 
 import { WarehouseDto } from './dto/warehouse.dto';
 import {Warehouse} from "./entities/warehouse.entity";
+import {ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags} from "@nestjs/swagger";
 
+@ApiTags('warehouse')
 @Controller('warehouse')
 export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
+  @ApiOperation({description: 'Get all warehouses'})
+  @ApiOkResponse({type: [Warehouse], status: 201})
+  @ApiNotFoundResponse({type: 'Not found', status: 404})
   @Get()
   getAll(): Promise<Warehouse[] | HttpException> {
     try {
@@ -28,6 +33,9 @@ export class WarehouseController {
   }
 
   @Get('/:id')
+  @ApiOperation({description: 'Get warehouses by ID'})
+  @ApiOkResponse({type: Warehouse, status: 201})
+  @ApiNotFoundResponse({type: 'Not found', status: 404})
   getById(@Param('id') id: number): Promise<Warehouse | HttpException> {
     try {
       return this.warehouseService.getById(id);
@@ -37,6 +45,9 @@ export class WarehouseController {
   }
 
   @Post()
+  @ApiOperation({description: 'Create warehouse'})
+  @ApiOkResponse({type: 'Created', status: 201})
+  @ApiConflictResponse({type: 'Warehouse already exist', status: 409})
   create(@Body() data: WarehouseDto): Promise<HttpException> {
     try {
       return this.warehouseService.create(data);
@@ -45,6 +56,9 @@ export class WarehouseController {
     }
   }
 
+  @ApiOperation({description: 'Update warehouse name or add product to warehouse'})
+  @ApiOkResponse({type: 'Updated!', status: 201})
+  @ApiNotFoundResponse({type: 'Warehouse does not exist!', status: 404})
   @Patch()
   update(@Body() data: WarehouseDto): Promise<HttpException> {
     try {
@@ -54,6 +68,9 @@ export class WarehouseController {
     }
   }
 
+  @ApiOperation({description: 'Delete warehouses by ID'})
+  @ApiOkResponse({type: Warehouse, status: 201})
+  @ApiNotFoundResponse({type: 'Warehouse does not exist!', status: 404})
   @Delete('/:id')
   delete(@Param('id') id: number): Promise<Warehouse | HttpException> {
     try {
