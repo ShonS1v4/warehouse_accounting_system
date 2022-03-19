@@ -52,6 +52,24 @@ export class ProductService {
         stock: product.stock,
       });
 
+      const stashed = await this.stashRepo.findOne({where: {name: name}})
+
+      if (!stashed)
+        return new HttpException(`Product ${name} not found`, 404);
+
+      candidate.products.map(async productItem => {
+        if (productItem.name == stashed.name) {
+          await this.productRepo.save({
+            id: productItem.id,
+            name: productItem.name,
+            stock: productItem.stock + product.stock
+          })
+          return new HttpException(`UnStashed`, 201)
+        }
+      })
+
+      stashed.stock -= product.stock;
+      await this.stashRepo.save(stashed)
       await this.productRepo.save(newProduct);
       candidate.products.push(newProduct);
       await this.warehouseService.save(candidate);
@@ -59,7 +77,7 @@ export class ProductService {
       return new HttpException(`UnStashed`, 201)
     }
 
-    return new HttpException(`Product ${name} not found`, 404);
+    return new HttpException(`Warehouse with id: ${product.warehouseId} not found`, 404);
   }
 
   async getById(id: number): Promise<Product | HttpException> {
@@ -72,11 +90,22 @@ export class ProductService {
     return candidate
   }
 
-  async getAll(): Promise<Product[] | HttpException> {
+  async getAll(): Promise<any> {
     const products = await this.productRepo.find({ relations: ['warehouses'] });
+    const stashed = await this.stashRepo.find();
+    const allProducts = {
+      products: [],
+      stashed: []
+    };
     if (products.length === 0)
-      return new HttpException('Products not found!', 404)
-    return products
+      allProducts.products.push({warning: "Products in warehouse not found"})
+    if (products.length > 0)
+      allProducts.products.push(products)
+    if (stashed.length === 0)
+      allProducts.stashed.push({warning: "Stashed products not found"})
+    if (stashed.length > 0)
+      allProducts.stashed.push(stashed)
+    return allProducts
   }
 
   async remove(id: number): Promise<Product | HttpException> {
@@ -104,7 +133,7 @@ export class ProductService {
       return new HttpException('Product to move not found!', 404)
 
     if (data.stock > product.stock)
-      return new HttpException(`You cant move more product when you have`, 409);
+      return new HttpException(`You cant move more product when you have in warehouse`, 409);
 
     if (data.stock == product.stock) await this.productRepo.remove(product);
 
