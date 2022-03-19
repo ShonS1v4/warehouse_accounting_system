@@ -1,6 +1,4 @@
 import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import { Warehouse } from './entities/warehouse.entity';
 import { ProductService } from '../product/product.service';
@@ -8,11 +6,12 @@ import { ProductService } from '../product/product.service';
 import { WarehouseDto } from './dto/warehouse.dto';
 import { WarehouseProductsDto } from './dto/warehouseProducts.dto';
 import { ProductWarehouseDto } from '../product/dto/productWarehouse.dto';
+import {InjectModel} from "@nestjs/sequelize";
 
 @Injectable()
 export class WarehouseService {
   constructor(
-    @InjectRepository(Warehouse) private wareHouseRepo: Repository<Warehouse>,
+    @InjectModel(Warehouse) private wareHouseRepo: typeof Warehouse,
     @Inject(forwardRef(() => ProductService))
     private readonly productService: ProductService,
   ) {}
@@ -23,11 +22,11 @@ export class WarehouseService {
     });
     if (candidate) return new HttpException(`Warehouse already exist!`, 409);
 
-    const newWarehouse = this.wareHouseRepo.create({
+    const newWarehouse = await this.wareHouseRepo.create({
       name: warehouse.name,
     });
 
-    await this.wareHouseRepo.save(newWarehouse);
+    await newWarehouse.save();
 
     if (warehouse.products)
       await this.setProduct(warehouse.products, newWarehouse.id);
@@ -74,24 +73,23 @@ export class WarehouseService {
   async getById(id: number): Promise<Warehouse> {
     return this.wareHouseRepo.findOne({
       where: { id: id },
-      relations: ['products'],
+      //TODO get relations
     });
   }
 
   async getAll(): Promise<Warehouse[]> {
-    return this.wareHouseRepo.find({ relations: ['products'] });
+    return this.wareHouseRepo.findAll({ //TODO get relations
+       });
   }
 
-  async remove(id: number): Promise<Warehouse> {
+  async remove(id: number): Promise<HttpException> {
     const candidate = await this.getById(id);
 
     if (!candidate)
       throw new HttpException('Warehouse with current email not found', 404);
 
-    return this.wareHouseRepo.remove(candidate);
-  }
+    await candidate.destroy();
 
-  async save(warehouse: Warehouse): Promise<Warehouse> {
-    return this.wareHouseRepo.save(warehouse);
+    return new HttpException('Removed', 205)
   }
 }

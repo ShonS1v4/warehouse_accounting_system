@@ -1,13 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, DataType, Model, Table} from "sequelize-typescript";
 
-@Entity()
-export class Stash {
-  @PrimaryGeneratedColumn()
+@Table
+export class Stash extends Model {
+  @Column({type: DataType.INTEGER, autoIncrement: true, primaryKey: true})
   id: number;
 
-  @Column({ nullable: false, unique: true })
+  @Column({unique: true})
   name: string;
 
-  @Column({ nullable: false })
+  @Column
   stock: number;
 }

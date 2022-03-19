@@ -1,17 +1,17 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { WarehouseModule } from '../warehouse/warehouse.module';
 import { Stash } from './entities/stash.entity';
+import {SequelizeModule} from "@nestjs/sequelize";
 
 @Module({
   controllers: [ProductController],
   providers: [ProductService],
   imports: [
     forwardRef(() => WarehouseModule),
-    TypeOrmModule.forFeature([Product, Stash]),
+    SequelizeModule.forFeature([Product, Stash]),
   ],
   exports: [ProductService],
 })
