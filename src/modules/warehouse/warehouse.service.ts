@@ -1,8 +1,10 @@
 import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Warehouse } from './entities/warehouse.entity';
 import { Repository } from 'typeorm';
+
+import { Warehouse } from './entities/warehouse.entity';
 import { ProductService } from '../product/product.service';
+
 import { WarehouseDto } from './dto/warehouse.dto';
 import { WarehouseProductsDto } from './dto/warehouseProducts.dto';
 import { ProductWarehouseDto } from '../product/dto/productWarehouse.dto';
@@ -15,8 +17,7 @@ export class WarehouseService {
     private readonly productService: ProductService,
   ) {}
 
-  //ГОТОВО
-  async create(warehouse: WarehouseDto) {
+  async create(warehouse: WarehouseDto): Promise<HttpException> {
     const candidate = await this.wareHouseRepo.findOne({
       where: { name: warehouse.name },
     });
@@ -34,9 +35,9 @@ export class WarehouseService {
     return new HttpException(`Created`, 201);
   }
 
-  //TODO rework it
-  async setProduct(product: WarehouseProductsDto[], id: number) {
+  async setProduct(product: WarehouseProductsDto[], id: number): Promise<HttpException> {
     const products: ProductWarehouseDto[] = [];
+
     product.map(async (item) => {
       const productAdd: ProductWarehouseDto = {
         warehouseId: id,
@@ -44,28 +45,32 @@ export class WarehouseService {
       };
       products.push(productAdd);
     });
+
     for (let i = 0; i < products.length; i++) {
       await this.productService.unStash(products[i], product[i].name);
     }
+
+    return new HttpException(`Moved`, 201)
   }
 
-  //ГОТОВО
-  async update(warehouse: WarehouseDto) {
+  async update(warehouse: WarehouseDto): Promise<HttpException> {
     const candidate = await this.wareHouseRepo.findOne({
       where: { name: warehouse.name },
     });
+
     if (!candidate)
       return new HttpException(
         `Warehouse ${warehouse.name} doesn't exist!`,
         404,
       );
+
     if (warehouse.name) candidate.name = warehouse.name;
+
     if (warehouse.products)
       await this.setProduct(warehouse.products, candidate.id);
     return new HttpException(`Updated!`, 201);
   }
 
-  //ГОТОВО
   async getById(id: number): Promise<Warehouse> {
     return this.wareHouseRepo.findOne({
       where: { id: id },
@@ -73,21 +78,20 @@ export class WarehouseService {
     });
   }
 
-  //ГОТОВО
   async getAll(): Promise<Warehouse[]> {
     return this.wareHouseRepo.find({ relations: ['products'] });
   }
 
-  //ГОТОВО
-  async remove(id: number) {
+  async remove(id: number): Promise<Warehouse> {
     const candidate = await this.getById(id);
+
     if (!candidate)
       throw new HttpException('Warehouse with current email not found', 404);
+
     return this.wareHouseRepo.remove(candidate);
   }
 
-  //ГОТОВО
-  async save(warehouse: Warehouse) {
+  async save(warehouse: Warehouse): Promise<Warehouse> {
     return this.wareHouseRepo.save(warehouse);
   }
 }
