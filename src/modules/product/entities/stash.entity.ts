@@ -1,11 +1,11 @@
-import {Column, DataType, Model, Table} from "sequelize-typescript";
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 @Table
 export class Stash extends Model {
-  @Column({type: DataType.INTEGER, autoIncrement: true, primaryKey: true})
+  @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
   id: number;
 
-  @Column({unique: true})
+  @Column({ unique: true })
   name: string;
 
   @Column

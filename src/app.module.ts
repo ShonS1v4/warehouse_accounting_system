@@ -5,7 +5,7 @@ import { Warehouse } from './modules/warehouse/entities/warehouse.entity';
 import { WarehouseModule } from './modules/warehouse/warehouse.module';
 import { ProductModule } from './modules/product/product.module';
 import { Stash } from './modules/product/entities/stash.entity';
-import {SequelizeModule} from "@nestjs/sequelize";
+import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
   imports: [

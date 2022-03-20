@@ -3,7 +3,7 @@ import { WarehouseService } from './warehouse.service';
 import { WarehouseController } from './warehouse.controller';
 import { Warehouse } from './entities/warehouse.entity';
 import { ProductModule } from '../product/product.module';
-import {SequelizeModule} from "@nestjs/sequelize";
+import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
   providers: [WarehouseService],

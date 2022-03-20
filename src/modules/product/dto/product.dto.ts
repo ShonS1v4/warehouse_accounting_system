@@ -1,11 +1,11 @@
 import { ProductWarehouseDto } from './productWarehouse.dto';
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductDto {
-  @ApiProperty({example: 'Product Name'})
+  @ApiProperty({ example: 'Product Name' })
   name: string;
-  @ApiProperty({example: 100})
+  @ApiProperty({ example: 100 })
   stock: number;
-  @ApiProperty({required: false, example: ProductWarehouseDto})
+  @ApiProperty({ required: false, example: ProductWarehouseDto })
   warehouse?: ProductWarehouseDto[];
 }

@@ -1,8 +1,8 @@
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class WarehouseProductsDto {
-  @ApiProperty({example: 'Product Name'})
+  @ApiProperty({ example: 'Product Name' })
   name: string;
-  @ApiProperty({example: 100})
+  @ApiProperty({ example: 100 })
   stock: number;
 }

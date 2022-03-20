@@ -1,12 +1,12 @@
-import {forwardRef, HttpException, Inject, Injectable} from '@nestjs/common';
+import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
 
-import {Warehouse} from './entities/warehouse.entity';
-import {ProductService} from '../product/product.service';
+import { Warehouse } from './entities/warehouse.entity';
+import { ProductService } from '../product/product.service';
 
-import {WarehouseDto} from './dto/warehouse.dto';
-import {WarehouseProductsDto} from './dto/warehouseProducts.dto';
-import {ProductWarehouseDto} from '../product/dto/productWarehouse.dto';
-import {InjectModel} from "@nestjs/sequelize";
+import { WarehouseDto } from './dto/warehouse.dto';
+import { WarehouseProductsDto } from './dto/warehouseProducts.dto';
+import { ProductWarehouseDto } from '../product/dto/productWarehouse.dto';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class WarehouseService {
@@ -34,7 +34,10 @@ export class WarehouseService {
     return new HttpException(`Created`, 201);
   }
 
-  async setProduct(product: WarehouseProductsDto[], id: number): Promise<HttpException> {
+  async setProduct(
+    product: WarehouseProductsDto[],
+    id: number,
+  ): Promise<HttpException> {
     const products: ProductWarehouseDto[] = [];
 
     product.map(async (item) => {
@@ -49,7 +52,7 @@ export class WarehouseService {
       await this.productService.unStash(products[i], product[i].name);
     }
 
-    return new HttpException(`Moved`, 201)
+    return new HttpException(`Moved`, 201);
   }
 
   async update(warehouse: WarehouseDto): Promise<HttpException> {
@@ -72,7 +75,7 @@ export class WarehouseService {
 
   async getById(id: number): Promise<Warehouse> {
     return this.wareHouseRepo.findOne({
-      where: { id: id }
+      where: { id: id },
     });
   }
 
@@ -88,6 +91,6 @@ export class WarehouseService {
 
     await candidate.destroy();
 
-    return new HttpException('Removed', 205)
+    return new HttpException('Removed', 205);
   }
 }
