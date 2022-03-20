@@ -9,7 +9,7 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Warehouse accounting system')
     .setDescription('Documentation for NestJS "WAS API"')
-    .setVersion('release 1.0')
+    .setVersion('release 1.1')
     .build();
 
   const swagger = SwaggerModule.createDocument(app, swaggerConfig);
