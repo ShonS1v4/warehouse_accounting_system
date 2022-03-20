@@ -14,7 +14,7 @@ import { ProductWarehouseDto } from './dto/productWarehouse.dto';
 export class ProductService {
   constructor(
     @InjectModel(Product) private productRepo: typeof Product,
-    @InjectModel(Product) private stashRepo: typeof Stash,
+    @InjectModel(Stash) private stashRepo: typeof Stash,
     @Inject(forwardRef(() => WarehouseService))
     private readonly warehouseService: WarehouseService,
   ) {}
@@ -26,18 +26,24 @@ export class ProductService {
       },
     });
 
+    console.log(candidate)
+
     if (candidate) return new HttpException(`${data.name} already exist!`, 409);
 
     const product = await this.stashRepo.create({
       name: data.name,
       stock: data.stock,
     });
+
+    console.log(product)
     await product.save();
 
-    if (data.warehouse)
+    if (data.warehouse) {
+      console.log(true)
       data.warehouse.map(
-        async (item) => await this.unStash(item, product.name),
+          async (item) => await this.unStash(item, product.name),
       );
+    }
 
     return new HttpException(`Created`, 201);
   }
@@ -46,32 +52,21 @@ export class ProductService {
     const candidate = await this.warehouseService.getById(product.warehouseId);
 
     if (candidate) {
-      const newProduct = await this.productRepo.create({
-        name: name,
-        stock: product.stock,
-      });
 
       const stashed = await this.stashRepo.findOne({where: {name: name}})
 
       if (!stashed)
         return new HttpException(`Product ${name} not found`, 404);
 
-      candidate.products.map(async productItem => {
-        if (productItem.name == stashed.name) {
-          await productItem.update({
-            id: productItem.id,
-            name: productItem.name,
-            stock: productItem.stock + product.stock
-          })
-          return new HttpException(`UnStashed`, 201)
-        }
-      })
+      const newProduct = await this.productRepo.create({
+        name: name,
+        stock: product.stock,
+        warehouseId: candidate.id,
+      });
 
       stashed.stock -= product.stock;
       await stashed.save();
       await newProduct.save();
-      // TODO add new product to warehouse
-      // candidate.products.push(newProduct);
       await candidate.save();
 
       return new HttpException(`UnStashed`, 201)
@@ -83,7 +78,6 @@ export class ProductService {
   async getById(id: number): Promise<Product | HttpException> {
     const candidate = await this.productRepo.findOne({
       where: { id: id },
-      //TODO get relations
     });
     if (!candidate)
       return new HttpException(`Product with ${id} not found!`, 404)
@@ -91,9 +85,7 @@ export class ProductService {
   }
 
   async getAll(): Promise<any> {
-    const products = await this.productRepo.findAll(
-        //TODO get relations
-    );
+    const products = await this.productRepo.findAll();
     const stashed = await this.stashRepo.findAll();
     const allProducts = {
       products: [],
@@ -136,12 +128,12 @@ export class ProductService {
     const newProduct = await this.productRepo.create({
       name: product.name,
       stock: data.stock,
+      warehouseId: warehouse.id,
     });
 
     product.stock -= data.stock;
     await newProduct.save();
     await product.save();
-    warehouse.products.push(newProduct);
     await warehouse.save();
 
     return new HttpException(`Moved`, 201)

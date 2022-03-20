@@ -13,6 +13,6 @@ export class Warehouse extends Model{
   name: string;
 
   @ApiProperty({example: [Product]})
-  @HasMany(()=> Product)
+  @HasMany(()=> Product, 'warehouseId')
   products: Product[];
 }

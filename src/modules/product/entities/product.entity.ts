@@ -1,6 +1,6 @@
 import { Warehouse } from '../../warehouse/entities/warehouse.entity';
 import {ApiProperty} from "@nestjs/swagger";
-import {Column, Model, Table} from "sequelize-typescript";
+import { Column, Model, Table} from "sequelize-typescript";
 import {DataType} from 'sequelize-typescript';
 
 @Table

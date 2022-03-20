@@ -1,11 +1,11 @@
-import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
+import {forwardRef, HttpException, Inject, Injectable} from '@nestjs/common';
 
-import { Warehouse } from './entities/warehouse.entity';
-import { ProductService } from '../product/product.service';
+import {Warehouse} from './entities/warehouse.entity';
+import {ProductService} from '../product/product.service';
 
-import { WarehouseDto } from './dto/warehouse.dto';
-import { WarehouseProductsDto } from './dto/warehouseProducts.dto';
-import { ProductWarehouseDto } from '../product/dto/productWarehouse.dto';
+import {WarehouseDto} from './dto/warehouse.dto';
+import {WarehouseProductsDto} from './dto/warehouseProducts.dto';
+import {ProductWarehouseDto} from '../product/dto/productWarehouse.dto';
 import {InjectModel} from "@nestjs/sequelize";
 
 @Injectable()
@@ -72,14 +72,12 @@ export class WarehouseService {
 
   async getById(id: number): Promise<Warehouse> {
     return this.wareHouseRepo.findOne({
-      where: { id: id },
-      //TODO get relations
+      where: { id: id }
     });
   }
 
   async getAll(): Promise<Warehouse[]> {
-    return this.wareHouseRepo.findAll({ //TODO get relations
-       });
+    return this.wareHouseRepo.findAll();
   }
 
   async remove(id: number): Promise<HttpException> {

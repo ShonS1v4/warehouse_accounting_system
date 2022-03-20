@@ -9,7 +9,7 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
       .setTitle('Warehouse accounting system')
       .setDescription('Documentation for NestJS "WAS API"')
-      .setVersion('beta 0.9')
+      .setVersion('release 1.0')
       .build()
 
   const swagger = SwaggerModule.createDocument(app, swaggerConfig)
@@ -17,7 +17,8 @@ async function bootstrap() {
   SwaggerModule.setup('/api', app, swagger)
 
   await app.listen(port, async () => {
-    console.log(`Server started on http://localhost:${port || 3001}/api`);
+    console.log(`Server started on http://localhost:${port || 3001}`);
+    console.log(`Please, visit documentation on http://localhost:${port || 3001}/api`);
   });
 }
 
