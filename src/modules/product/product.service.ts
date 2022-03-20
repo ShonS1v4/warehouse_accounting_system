@@ -1,6 +1,5 @@
 import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {InjectModel} from "@nestjs/sequelize";
 
 import { Product } from './entities/product.entity';
 import { WarehouseService } from '../warehouse/warehouse.service';
@@ -14,8 +13,8 @@ import { ProductWarehouseDto } from './dto/productWarehouse.dto';
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectRepository(Product) private productRepo: Repository<Product>,
-    @InjectRepository(Stash) private stashRepo: Repository<Stash>,
+    @InjectModel(Product) private productRepo: typeof Product,
+    @InjectModel(Stash) private stashRepo: typeof Stash,
     @Inject(forwardRef(() => WarehouseService))
     private readonly warehouseService: WarehouseService,
   ) {}
@@ -27,18 +26,24 @@ export class ProductService {
       },
     });
 
+    console.log(candidate)
+
     if (candidate) return new HttpException(`${data.name} already exist!`, 409);
 
     const product = await this.stashRepo.create({
       name: data.name,
       stock: data.stock,
     });
-    await this.stashRepo.save(product);
 
-    if (data.warehouse)
+    console.log(product)
+    await product.save();
+
+    if (data.warehouse) {
+      console.log(true)
       data.warehouse.map(
-        async (item) => await this.unStash(item, product.name),
+          async (item) => await this.unStash(item, product.name),
       );
+    }
 
     return new HttpException(`Created`, 201);
   }
@@ -47,32 +52,22 @@ export class ProductService {
     const candidate = await this.warehouseService.getById(product.warehouseId);
 
     if (candidate) {
-      const newProduct = this.productRepo.create({
-        name: name,
-        stock: product.stock,
-      });
 
       const stashed = await this.stashRepo.findOne({where: {name: name}})
 
       if (!stashed)
         return new HttpException(`Product ${name} not found`, 404);
 
-      candidate.products.map(async productItem => {
-        if (productItem.name == stashed.name) {
-          await this.productRepo.save({
-            id: productItem.id,
-            name: productItem.name,
-            stock: productItem.stock + product.stock
-          })
-          return new HttpException(`UnStashed`, 201)
-        }
-      })
+      const newProduct = await this.productRepo.create({
+        name: name,
+        stock: product.stock,
+        warehouseId: candidate.id,
+      });
 
       stashed.stock -= product.stock;
-      await this.stashRepo.save(stashed)
-      await this.productRepo.save(newProduct);
-      candidate.products.push(newProduct);
-      await this.warehouseService.save(candidate);
+      await stashed.save();
+      await newProduct.save();
+      await candidate.save();
 
       return new HttpException(`UnStashed`, 201)
     }
@@ -83,7 +78,6 @@ export class ProductService {
   async getById(id: number): Promise<Product | HttpException> {
     const candidate = await this.productRepo.findOne({
       where: { id: id },
-      relations: ['warehouses'],
     });
     if (!candidate)
       return new HttpException(`Product with ${id} not found!`, 404)
@@ -91,8 +85,8 @@ export class ProductService {
   }
 
   async getAll(): Promise<any> {
-    const products = await this.productRepo.find({ relations: ['warehouses'] });
-    const stashed = await this.stashRepo.find();
+    const products = await this.productRepo.findAll();
+    const stashed = await this.stashRepo.findAll();
     const allProducts = {
       products: [],
       stashed: []
@@ -110,15 +104,9 @@ export class ProductService {
 
   async remove(id: number): Promise<Product | HttpException> {
     const candidate = await this.getById(id);
-    return this.productRepo.remove(<Product>candidate);
-  }
-
-  async save(product: Product): Promise<Product> {
-    try {
-      return this.productRepo.save(product);
-    } catch (e) {
-      throw new HttpException('Something goes wrong, please, try again', 400)
-    }
+    if (candidate instanceof Product)
+      await candidate.destroy()
+    return new HttpException('Removed', 205)
   }
 
   async moveTo(data: MoveDto, id: number): Promise<HttpException> {
@@ -135,18 +123,18 @@ export class ProductService {
     if (data.stock > product.stock)
       return new HttpException(`You cant move more product when you have in warehouse`, 409);
 
-    if (data.stock == product.stock) await this.productRepo.remove(product);
+    if (data.stock == product.stock) await product.destroy();
 
     const newProduct = await this.productRepo.create({
       name: product.name,
       stock: data.stock,
+      warehouseId: warehouse.id,
     });
 
     product.stock -= data.stock;
-    await this.save(newProduct);
-    await this.save(product);
-    warehouse.products.push(newProduct);
-    await this.warehouseService.save(warehouse);
+    await newProduct.save();
+    await product.save();
+    await warehouse.save();
 
     return new HttpException(`Moved`, 201)
   }

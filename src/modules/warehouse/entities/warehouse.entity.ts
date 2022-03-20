@@ -1,20 +1,18 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Product } from '../../product/entities/product.entity';
 import {ApiProperty} from "@nestjs/swagger";
+import {Column, DataType, HasMany, Model, Table} from "sequelize-typescript";
 
-@Entity()
-export class Warehouse {
+@Table
+export class Warehouse extends Model{
   @ApiProperty({example: 1})
-  @PrimaryGeneratedColumn()
+  @Column({type: DataType.INTEGER, autoIncrement: true, primaryKey: true})
   id: number;
 
   @ApiProperty({example: 'Warehouse Name'})
-  @Column()
+  @Column
   name: string;
 
   @ApiProperty({example: [Product]})
-  @OneToMany(() => Product, (product) => product.warehouses, {
-    cascade: true,
-  })
+  @HasMany(()=> Product, 'warehouseId')
   products: Product[];
 }
