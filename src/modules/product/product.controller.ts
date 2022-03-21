@@ -23,6 +23,7 @@ import { Product } from './entities/product.entity';
 import { ProductDto } from './dto/product.dto';
 import { MoveDto } from './dto/move.dto';
 import { ProductWarehouseDto } from './dto/productWarehouse.dto';
+import {ProductDoc} from "./doc/product.doc";
 
 @ApiTags('products')
 @Controller('product')
@@ -30,7 +31,7 @@ export class ProductController {
   constructor(private readonly productsService: ProductService) {}
 
   @ApiOperation({ description: 'Get all products' })
-  @ApiOkResponse({ type: [Product] })
+  @ApiOkResponse({ type: [ProductDoc] })
   @ApiNotFoundResponse({ type: NotFoundException })
   @Get()
   getAll(): Promise<Product[] | HttpException> {
@@ -42,7 +43,7 @@ export class ProductController {
   }
 
   @ApiOperation({ description: 'Get product by ID' })
-  @ApiOkResponse({ type: Product })
+  @ApiOkResponse({ type: ProductDoc })
   @ApiNotFoundResponse({ type: 'Product not found!', status: 404 })
   @Get('/:id')
   getById(@Param('id') id: number): Promise<Product | HttpException> {
@@ -54,7 +55,7 @@ export class ProductController {
   }
 
   @ApiOperation({ description: 'Get products by WarehouseID' })
-  @ApiOkResponse({ type: [Product] })
+  @ApiOkResponse({ type: [ProductDoc] })
   @ApiNotFoundResponse({ type: 'Products not found!', status: 404 })
   @Get('/warehouse/:id')
   getByWarehouseId(@Param('id') warehouseId: number) {
@@ -105,7 +106,7 @@ export class ProductController {
   }
 
   @ApiOperation({ description: 'Delete product by id' })
-  @ApiOkResponse({ type: Product })
+  @ApiOkResponse({ type: ProductDoc })
   @ApiNotFoundResponse({ type: NotFoundException })
   @Delete('/:id')
   remove(@Param('id') id: number): Promise<Product | HttpException> {

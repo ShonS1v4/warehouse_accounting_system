@@ -20,6 +20,7 @@ import { WarehouseService } from './warehouse.service';
 
 import { WarehouseDto } from './dto/warehouse.dto';
 import { Warehouse } from './entities/warehouse.entity';
+import {WarehouseDoc} from "./doc/warehouse.doc";
 
 @ApiTags('warehouse')
 @Controller('warehouse')
@@ -27,7 +28,7 @@ export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @ApiOperation({ description: 'Get all warehouses' })
-  @ApiOkResponse({ type: [Warehouse], status: 201 })
+  @ApiOkResponse({ type: [WarehouseDoc], status: 201 })
   @ApiNotFoundResponse({ type: 'Not found', status: 404 })
   @Get()
   getAll(): Promise<Warehouse[] | HttpException> {
@@ -38,10 +39,10 @@ export class WarehouseController {
     }
   }
 
-  @Get('/:id')
   @ApiOperation({ description: 'Get warehouses by ID' })
-  @ApiOkResponse({ type: Warehouse, status: 201 })
+  @ApiOkResponse({ type: WarehouseDoc, status: 201 })
   @ApiNotFoundResponse({ type: 'Not found', status: 404 })
+  @Get('/:id')
   getById(@Param('id') id: number): Promise<Warehouse | HttpException> {
     try {
       return this.warehouseService.getById(id);
@@ -50,10 +51,10 @@ export class WarehouseController {
     }
   }
 
-  @Post()
   @ApiOperation({ description: 'Create warehouse' })
   @ApiOkResponse({ type: 'Created', status: 201 })
   @ApiConflictResponse({ type: 'Warehouse already exist', status: 409 })
+  @Post()
   create(@Body() data: WarehouseDto): Promise<HttpException> {
     try {
       return this.warehouseService.create(data);
@@ -67,17 +68,18 @@ export class WarehouseController {
   })
   @ApiOkResponse({ type: 'Updated!', status: 201 })
   @ApiNotFoundResponse({ type: 'Warehouse does not exist!', status: 404 })
-  @Patch()
-  update(@Body() data: WarehouseDto): Promise<HttpException> {
+  @Patch('/:id')
+  update(@Body() data: WarehouseDto,
+          @Param('id') id: number): Promise<HttpException> {
     try {
-      return this.warehouseService.update(data);
+      return this.warehouseService.update(data, id);
     } catch (e) {
       throw new HttpException(e.message, 500);
     }
   }
 
   @ApiOperation({ description: 'Delete warehouses by ID' })
-  @ApiOkResponse({ type: Warehouse, status: 201 })
+  @ApiOkResponse({ type: WarehouseDoc, status: 201 })
   @ApiNotFoundResponse({ type: 'Warehouse does not exist!', status: 404 })
   @Delete('/:id')
   delete(@Param('id') id: number): Promise<Warehouse | HttpException> {
