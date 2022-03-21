@@ -20,6 +20,7 @@ export class WarehouseService {
     const candidate = await this.wareHouseRepo.findOne({
       where: { name: warehouse.name },
     });
+
     if (candidate) return new HttpException(`Warehouse already exist!`, 409);
 
     const newWarehouse = await this.wareHouseRepo.create({
@@ -55,9 +56,9 @@ export class WarehouseService {
     return new HttpException(`Moved`, 201);
   }
 
-  async update(warehouse: WarehouseDto): Promise<HttpException> {
+  async update(warehouse: WarehouseDto, id: number): Promise<HttpException> {
     const candidate = await this.wareHouseRepo.findOne({
-      where: { name: warehouse.name },
+      where: { id: id },
     });
 
     if (!candidate)
@@ -70,6 +71,9 @@ export class WarehouseService {
 
     if (warehouse.products)
       await this.setProduct(warehouse.products, candidate.id);
+    
+    await candidate.save()
+    
     return new HttpException(`Updated!`, 201);
   }
 

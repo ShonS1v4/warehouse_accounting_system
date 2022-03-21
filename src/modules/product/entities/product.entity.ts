@@ -1,22 +1,18 @@
-import { Warehouse } from '../../warehouse/entities/warehouse.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, Model, Table } from 'sequelize-typescript';
 import { DataType } from 'sequelize-typescript';
 
 @Table
 export class Product extends Model {
-  @ApiProperty({ example: 1 })
   @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
+  @ApiProperty({ example: 1 })
   id: number;
 
-  @ApiProperty({ example: 'Product name' })
   @Column
+  @ApiProperty({ example: 'Product name' })
   name: string;
 
-  @ApiProperty({ example: 100 })
   @Column
+  @ApiProperty({ example: 100 })
   stock: number;
-
-  @ApiProperty({ example: Warehouse })
-  warehouses: Warehouse;
 }
