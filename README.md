@@ -2,17 +2,17 @@
 
 Ready to use backend API for Warehouse accounting system.
 
-##Requires:
+## Requires:
 
 - Docker ✨
 - Internet connection ✨
 
-##How to start:
+## How to start:
 
 - Open .api directory in your terminal
 - run ```docker-compose up --build``` in your terminal
 
-##How to test:
+## How to test:
 
 - Open WAS.postman_collection.json in "postman" application
 - Test)
